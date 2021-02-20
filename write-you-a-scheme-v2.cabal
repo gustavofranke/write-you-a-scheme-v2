@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fd799a2cd6de06641f1fa10310d2a5c158c5934e936f26b5d5890cd277cbebac
+-- hash: 2f1e1d9b9db74ea69448941a1cb31f6e2d5885870d30dfcf99863e2007a048be
 
 name:           write-you-a-scheme-v2
 version:        0.1.0.0
@@ -27,7 +27,13 @@ source-repository head
 
 library
   exposed-modules:
+      Eval
       Lib
+      LispVal
+      Parser
+      Pretty
+      Prims
+      Repl
   other-modules:
       Paths_write_you_a_scheme_v2
   hs-source-dirs:
