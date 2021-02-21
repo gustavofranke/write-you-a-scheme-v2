@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2f1e1d9b9db74ea69448941a1cb31f6e2d5885870d30dfcf99863e2007a048be
+-- hash: 094712049f0cd423aa59bd1f75044f72fe607f8f9176116683fa59d66381dff8
 
 name:           write-you-a-scheme-v2
 version:        0.1.0.0
@@ -40,6 +40,10 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+    , text
   default-language: Haskell2010
 
 executable write-you-a-scheme-v2-exe
@@ -51,6 +55,10 @@ executable write-you-a-scheme-v2-exe
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+    , text
     , write-you-a-scheme-v2
   default-language: Haskell2010
 
@@ -64,5 +72,9 @@ test-suite write-you-a-scheme-v2-test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , containers
+    , mtl
+    , parsec
+    , text
     , write-you-a-scheme-v2
   default-language: Haskell2010
