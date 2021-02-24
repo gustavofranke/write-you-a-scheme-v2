@@ -3,6 +3,7 @@
 
 module LispVal where
 
+import Control.Exception
 import Control.Monad.Except
 import Control.Monad.Reader
 import Data.Data
@@ -50,3 +51,16 @@ newtype Eval a = Eval {unEval :: ReaderT EnvCtx IO a}
       MonadReader EnvCtx,
       MonadIO
     )
+
+data LispException
+  = NumArgs Integer [LispVal]
+  | TypeMismatch T.Text LispVal
+  | BadSpecialForm T.Text
+  | NotFunction LispVal
+  | UnboundVar T.Text
+  | PError String
+
+instance Exception LispException
+
+instance Show LispException where
+  show = undefined
