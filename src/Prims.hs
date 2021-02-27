@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Prims where
 
 import Control.Exception
@@ -7,6 +9,17 @@ import LispVal
 type Prim = [(T.Text, LispVal)]
 
 type Unary = LispVal -> Eval LispVal
+
+type Binary = LispVal -> LispVal -> Eval LispVal
+
+numOp :: (Integer -> Integer -> Integer) -> LispVal -> LispVal -> Eval LispVal
+numOp = undefined
+
+binopFold :: Binary -> LispVal -> [LispVal] -> Eval LispVal
+binopFold = undefined
+
+mkF :: ([LispVal] -> Eval LispVal) -> LispVal
+mkF = Fun . IFunc
 
 primEnv :: Prim
 primEnv = []
