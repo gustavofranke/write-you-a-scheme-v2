@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 094712049f0cd423aa59bd1f75044f72fe607f8f9176116683fa59d66381dff8
+-- hash: 12094fcd91dc6953a5fc01a2ea81281e4fa497162fd2484e66451d59d9dbd5be
 
 name:           write-you-a-scheme-v2
 version:        0.1.0.0
@@ -41,6 +41,7 @@ library
   build-depends:
       base >=4.7 && <5
     , containers
+    , haskeline
     , mtl
     , parsec
     , text
@@ -56,6 +57,7 @@ executable write-you-a-scheme-v2-exe
   build-depends:
       base >=4.7 && <5
     , containers
+    , haskeline
     , mtl
     , parsec
     , text
@@ -73,6 +75,7 @@ test-suite write-you-a-scheme-v2-test
   build-depends:
       base >=4.7 && <5
     , containers
+    , haskeline
     , mtl
     , parsec
     , text
