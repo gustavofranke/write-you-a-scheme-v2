@@ -1,4 +1,5 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Eval where
 
@@ -9,6 +10,8 @@ import qualified Data.Text as T
 import LispVal
 import Parser
 import Prims
+import Text.Parsec
+import qualified Data.Text.IO as TIO
 
 basicEnv :: Map.Map T.Text LispVal
 basicEnv = Map.fromList $ primEnv <> [("read", Fun $ IFunc $ unop $ readFn)]
@@ -33,6 +36,16 @@ runParseTest input =
     (T.pack . show)
     (T.pack . show)
     $ readExpr input
+
+safeExec :: IO a -> IO (Either String a)
+safeExec m = do
+  result <- Control.Exception.try m
+  case result of
+    Left (eTop :: SomeException) ->
+      case fromException eTop of
+        Just (enclosed :: LispException) -> return $ Left (show enclosed)
+        Nothing -> return $ Left (show eTop)
+    Right val -> return $ Right val
 
 runASTinEnv :: EnvCtx -> Eval b -> IO b
 runASTinEnv code action = runReaderT (unEval action) code
@@ -122,3 +135,31 @@ evalBody x = eval x
 
 lineToEvalForm :: T.Text -> Eval LispVal
 lineToEvalForm input = either (throw . PError . show) eval $ readExpr input
+
+sTDLIB :: FilePath 
+sTDLIB = "lib/stdlib.scm"
+
+getFileContents :: FilePath  -> IO T.Text
+getFileContents fname = do
+  exists <- doesFileExist fname
+  if exists then TIO.readFile fname else return "File does not exist."
+
+endOfList :: LispVal -> LispVal -> LispVal
+endOfList (List x) expr = List $ x ++ [expr]
+endOfList n _ = throw $ TypeMismatch "failure to get variable: " n
+
+parseWithLib :: T.Text -> T.Text -> Either ParseError LispVal 
+parseWithLib std inp = undefined
+-- parseWithLib std inp = do
+--   stdlib <- readExprFile sTDLIB std
+--   expr <- readExpr inp
+--   return $ endOfList stdlib expr
+
+textToEvalForm :: T.Text -> T.Text -> Eval LispVal
+textToEvalForm std input = either (throw . PError . show) evalBody $ parseWithLib std input
+
+evalText :: T.Text -> IO ()
+evalText textExpr = do
+  stdlib <- getFileContents sTDLIB
+  res <- runASTinEnv basicEnv $ textToEvalForm stdlib textExpr
+  print res
