@@ -20,15 +20,15 @@ readFn :: LispVal -> Eval LispVal
 readFn (String txt) = lineToEvalForm txt
 readFn val = throw $ TypeMismatch "read expects string, instead got:" val
 
-evalFile :: T.Text -> IO ()
-evalFile fileExpr = (runASTinEnv basicEnv $ fileToEvalForm fileExpr) >>= print
+evalFile :: FilePath -> T.Text -> IO ()
+evalFile filePath fileExpr = (runASTinEnv basicEnv $ fileToEvalForm filePath fileExpr) >>= print
 
-fileToEvalForm :: T.Text -> Eval LispVal
-fileToEvalForm input =
+fileToEvalForm :: FilePath -> T.Text -> Eval LispVal
+fileToEvalForm filePath input =
   either
     (throw . PError . show)
     evalBody
-    $ readExprFile input
+    $ readExprFile filePath input
 
 runParseTest :: T.Text -> T.Text
 runParseTest input =
@@ -149,11 +149,11 @@ endOfList (List x) expr = List $ x ++ [expr]
 endOfList n _ = throw $ TypeMismatch "failure to get variable: " n
 
 parseWithLib :: T.Text -> T.Text -> Either ParseError LispVal 
-parseWithLib std inp = undefined
--- parseWithLib std inp = do
---   stdlib <- readExprFile sTDLIB std
---   expr <- readExpr inp
---   return $ endOfList stdlib expr
+-- parseWithLib std inp = undefined
+parseWithLib std inp = do
+  stdlib <- readExprFile sTDLIB std
+  expr <- readExpr inp
+  return $ endOfList stdlib expr
 
 textToEvalForm :: T.Text -> T.Text -> Eval LispVal
 textToEvalForm std input = either (throw . PError . show) evalBody $ parseWithLib std input
