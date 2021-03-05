@@ -136,3 +136,20 @@ eqCmd (String x) (String y) = return . Bool $ x == y
 eqCmd (Bool x) (Bool y) = return . Bool $ x == y
 eqCmd Nil Nil = return $ Bool True
 eqCmd _ _ = return $ Bool False
+
+put :: LispVal -> LispVal -> Eval LispVal
+put (String file) (String msg) = undefined
+put (String _) val = undefined
+put val _ = undefined 
+
+wFilePut :: T.Text -> T.Text -> IO LispVal 
+wFilePut fileName msg = undefined
+
+putTextFile :: T.Text -> T.Text -> Handle -> IO LispVal
+putTextFile fileName msg handle = undefined 
+
+openURL :: T.Text -> IO LispVal
+openURL x = undefined 
+
+wSlurp :: LispVal -> Eval LispVal
+wSlurp (String txt) = undefined 
