@@ -26,6 +26,7 @@ dependencies:
 - mtl
 - parsec
 - haskeline
+- HTTP
 
 library:
   source-dirs: src

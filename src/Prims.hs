@@ -10,6 +10,8 @@ import qualified Data.Text.IO as TIO
 import LispVal
 import System.IO
 
+import Network.HTTP
+
 type Prim = [(T.Text, LispVal)]
 
 type Unary = LispVal -> Eval LispVal
@@ -87,7 +89,7 @@ readTextFile fileName handle = do
   exists <- hIsEOF handle
   if exists
     then (TIO.hGetContents handle) >>= (return . String)
-    else throw $ IOError $ T.concat [" file does not exist: ", fileName]
+    else throw $ IOError $ T.concat [T.pack $ " file does not exist: ", fileName]
 
 cons :: [LispVal] -> Eval LispVal
 cons [x, y@(List yList)] = return $ List $ x : y : yList
@@ -138,18 +140,27 @@ eqCmd Nil Nil = return $ Bool True
 eqCmd _ _ = return $ Bool False
 
 put :: LispVal -> LispVal -> Eval LispVal
-put (String file) (String msg) = undefined
-put (String _) val = undefined
-put val _ = undefined 
+put (String file) (String msg) = liftIO  $ wFilePut file msg
+put (String _) val = throw $ TypeMismatch "put expects string in the second argument" val
+put val _ = throw $ TypeMismatch "put expects string, insted got" val 
 
 wFilePut :: T.Text -> T.Text -> IO LispVal 
-wFilePut fileName msg = undefined
+wFilePut fileName msg = withFile (T.unpack fileName) WriteMode go
+  where go = putTextFile fileName msg
 
 putTextFile :: T.Text -> T.Text -> Handle -> IO LispVal
-putTextFile fileName msg handle = undefined 
+putTextFile fileName msg handle = do
+  canWrite <- hIsWritable handle
+  if canWrite
+    then (TIO.hPutStr handle msg) >> (return $ String msg)
+    else throw $ IOError $ T.concat [" file does not exist: ", fileName]
 
 openURL :: T.Text -> IO LispVal
-openURL x = undefined 
+openURL x = do
+  req <- simpleHTTP (getRequest $ T.unpack x) 
+  body <- getResponseBody req
+  return $ (String . T.pack) body
 
 wSlurp :: LispVal -> Eval LispVal
-wSlurp (String txt) = undefined 
+wSlurp (String txt) = liftIO $ openURL txt
+wSlurp val = throw $ TypeMismatch "wSlurp expects a string, instead got" val 
