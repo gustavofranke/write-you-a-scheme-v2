@@ -7,11 +7,11 @@ import Control.Exception
 import Control.Monad.Reader
 import qualified Data.Map as Map
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import LispVal
 import Parser
 import Prims
 import Text.Parsec
-import qualified Data.Text.IO as TIO
 
 basicEnv :: Map.Map T.Text LispVal
 basicEnv = Map.fromList $ primEnv <> [("read", Fun $ IFunc $ unop $ readFn)]
@@ -91,6 +91,18 @@ eval (List ((:) x xs)) = do
     (Fun (IFunc internalFn)) -> internalFn xVal
     (Lambda (IFunc internalfn) boundenv) -> local (const boundenv) $ internalfn xVal
     _ -> throw $ NotFunction funVar
+eval all@(List [Atom "cdr", List [Atom "quote", List (x : xs)]]) = return $ List xs
+eval all@(List [Atom "cdr", arg@(List (x : xs))]) = case x of
+  Atom _ -> do
+    val <- eval arg
+    eval $ List [Atom "cdr", val]
+  _ -> return $ List xs
+eval all@(List [Atom "car", List [Atom "quote", List (x : xs)]]) = return $ x
+eval all@(List [Atom "car", arg@(List (x : xs))]) = case x of
+  Atom _ -> do
+    val <- eval arg
+    eval $ List [Atom "car", val]
+  _ -> return x
 
 applyLambda :: LispVal -> [LispVal] -> [LispVal] -> Eval LispVal
 applyLambda expr params args = do
@@ -136,10 +148,10 @@ evalBody x = eval x
 lineToEvalForm :: T.Text -> Eval LispVal
 lineToEvalForm input = either (throw . PError . show) eval $ readExpr input
 
-sTDLIB :: FilePath 
+sTDLIB :: FilePath
 sTDLIB = "lib/stdlib.scm"
 
-getFileContents :: FilePath  -> IO T.Text
+getFileContents :: FilePath -> IO T.Text
 getFileContents fname = do
   exists <- doesFileExist fname
   if exists then TIO.readFile fname else return "File does not exist."
@@ -148,8 +160,7 @@ endOfList :: LispVal -> LispVal -> LispVal
 endOfList (List x) expr = List $ x ++ [expr]
 endOfList n _ = throw $ TypeMismatch "failure to get variable: " n
 
-parseWithLib :: T.Text -> T.Text -> Either ParseError LispVal 
--- parseWithLib std inp = undefined
+parseWithLib :: T.Text -> T.Text -> Either ParseError LispVal
 parseWithLib std inp = do
   stdlib <- readExprFile sTDLIB std
   expr <- readExpr inp
